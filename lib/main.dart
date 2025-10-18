@@ -42,88 +42,94 @@ class _CalculadoraState extends State<Calculadora> {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Center(
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          constraints: BoxConstraints(maxWidth: maxWidth),
-          child: Column(
-            children: [
-              Expanded(
-                flex: 2,
-                child: Container(
-                  alignment: Alignment.bottomRight,
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Text(
-                          userInput,
-                          style: const TextStyle(
-                            fontSize: 30,
-                            color: Colors.white70,
+      body: SafeArea( // 🔹 Previene desbordes en la parte superior e inferior
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            child: Column(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    alignment: Alignment.bottomRight,
+                    padding: const EdgeInsets.all(24),
+                    child: SingleChildScrollView(
+                      // 🔹 Esto evita el overflow cuando el texto del resultado crece
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Text(
+                              userInput,
+                              style: const TextStyle(
+                                fontSize: 30,
+                                color: Colors.white70,
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(height: 10),
+                          Text(
+                            resultado,
+                            style: const TextStyle(
+                              fontSize: 48,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 10),
-                      Text(
-                        resultado,
-                        style: const TextStyle(
-                          fontSize: 48,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-              Expanded(
-                flex: 5,
-                child: GridView.builder(
-                  itemCount: botones.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                    childAspectRatio: 1,
-                  ),
-                  itemBuilder: (context, index) {
-                    final texto = botones[index];
-                    final esOperador = _esOperador(texto);
-                    final esEspecial = texto == 'AC' || texto == 'DEL' || texto == '=';
+                Expanded(
+                  flex: 5,
+                  child: GridView.builder(
+                    padding: const EdgeInsets.only(bottom: 4), // 🔹 Evita el “bottom overflowed”
+                    itemCount: botones.length,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      childAspectRatio: 1,
+                    ),
+                    itemBuilder: (context, index) {
+                      final texto = botones[index];
+                      final esOperador = _esOperador(texto);
+                      final esEspecial = texto == 'AC' || texto == 'DEL' || texto == '=';
 
-                    return texto.isEmpty
-                        ? const SizedBox.shrink()
-                        : GestureDetector(
-                            onTap: () => _botonPresionado(texto),
-                            child: Container(
-                              margin: const EdgeInsets.all(1),
-                              decoration: BoxDecoration(
-                                color: Colors.black,
-                                border: Border.all(
-                                  color: Colors.white24, // líneas divisorias
-                                  width: 0.5,
+                      return texto.isEmpty
+                          ? const SizedBox.shrink()
+                          : GestureDetector(
+                              onTap: () => _botonPresionado(texto),
+                              child: Container(
+                                margin: const EdgeInsets.all(1),
+                                decoration: BoxDecoration(
+                                  color: Colors.black,
+                                  border: Border.all(
+                                    color: Colors.white24,
+                                    width: 0.5,
+                                  ),
                                 ),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  texto,
-                                  style: TextStyle(
-                                    fontSize: 26,
-                                    fontWeight: FontWeight.w500,
-                                    color: esEspecial || esOperador
-                                        ? Colors.deepOrangeAccent
-                                        : Colors.white,
+                                child: Center(
+                                  child: Text(
+                                    texto,
+                                    style: TextStyle(
+                                      fontSize: 26,
+                                      fontWeight: FontWeight.w500,
+                                      color: esEspecial || esOperador
+                                          ? Colors.deepOrangeAccent
+                                          : Colors.white,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          );
-                  },
+                            );
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -143,13 +149,11 @@ class _CalculadoraState extends State<Calculadora> {
         if (userInput.isNotEmpty) {
           userInput = userInput.substring(0, userInput.length - 1);
         }
-        // Actualizar resultado cuando se borra
         _calcularResultado();
       } else if (texto == '=') {
         _calcularResultado();
       } else {
         userInput += texto;
-        // Actualizar el resultado en tiempo real mientras se escribe
         _calcularResultado();
       }
     });
